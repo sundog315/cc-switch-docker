@@ -1,0 +1,20 @@
+version: "3.7"
+services:
+  cc-switch-webtop:
+    build: .
+    image: cc-switch-webtop:local
+    container_name: cc-switch
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Shanghai
+      - PASSWORD=changeme                  # noVNC 网页密码，部署后务必修改
+      - WEBKIT_DISABLE_COMPOSITING_MODE=1  # 容器内 webkit 渲染兼容
+    volumes:
+      - /home/greatwall/tools/cc-switch-data:/config
+    ports:
+      - "3000:3000"      # 网页 HTTP（Selkies WebCodecs 要求安全上下文，仅同机/调试用）
+      - "3001:3001"      # 网页 HTTPS（远程访问用这个：https://<IP>:3001）
+      - "15721:15721"    # cc-switch 代理（0.0.0.0，纯内网）
+    shm_size: "1gb"
+    restart: unless-stopped
