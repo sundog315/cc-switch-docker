@@ -1,0 +1,16 @@
+# ──────────────────────────────────────────────
+# cc-switch-container — open-source project files
+# ──────────────────────────────────────────────
+
+# cc-switch .deb (download manually from GitHub Releases)
+cc-switch.deb
+
+# Runtime data volume (auto-created)
+cc-switch-data/
+
+# Pre-built image tarball (not distributed via git)
+cc-switch-webtop.local.tar.gz
+cc-switch-webtop.local.tar.gz.sha256
+
+# Local planning / design docs (not part of the open-source package)
+docs/
