@@ -90,17 +90,16 @@ From **another computer's browser** (or the same machine):
 
 ### 6. Configure cc-switch proxy
 
-Inside the webtop desktop, if cc-switch doesn't appear automatically:
+cc-switch **auto-starts** on container boot (registered as an s6 longrun service — see [How auto-start works](#how-auto-start-works)), so its proxy on `:15721` is already up. You only need the GUI for the **one-time** provider/proxy setup:
 
-1. Right-click the desktop → **Open Terminal Here**
-2. Run: `cc-switch &`
-
-In the cc-switch window:
+In the webtop desktop, open the cc-switch window (if it's not visible, right-click the desktop → open a terminal → `cc-switch`). Then:
 
 1. **Add an LLM backend provider** — enter the Base URL and API Key for your LLM service
 2. Go to **Proxy settings** → enable the proxy → set port **15721**
 3. If there's a "Listen address" option, set it to `0.0.0.0`
 4. Select the provider as the active route target
+
+These settings persist in the `/config` volume, so you only do this once.
 
 ### 7. Connect Claude Code (or any CLI tool)
 
@@ -164,6 +163,18 @@ The container runs:
 
 ---
 
+## How auto-start works
+
+cc-switch is registered as an **s6-rc longrun service** (`rootfs/etc/s6-overlay/s6-rc.d/cc-switch/`) instead of relying on the desktop's autostart:
+
+- The `run` script waits for the X server (`svc-xorg`) to be ready (via `xset q`), then launches `cc-switch` as user `abc`.
+- It's part of the `user` bundle, so s6 starts it on every container boot — no manual launch or browser login needed.
+- s6 **supervises** the process: if cc-switch crashes, it's automatically restarted.
+
+The service source files are recompiled into the s6-rc database on every container start, so they take effect with no extra steps.
+
+---
+
 ## 🔐 Security Notes
 
 | Concern | Mitigation |
@@ -201,7 +212,6 @@ docker exec -it cc-switch bash
 
 | Issue | Workaround |
 |---|---|
-| **cc-switch doesn't auto-start** | The webtop XFCE session may be incomplete. **Fix:** Right-click desktop → Terminal → `cc-switch &` |
 | **Black screen + X cursor only** | Window manager didn't start. cc-switch window still works normally. |
 | **Upgrades require rebuild** | cc-switch is baked into the image. Download new `.deb`, re-run `docker compose build --no-cache`, then `up -d`. |
 
